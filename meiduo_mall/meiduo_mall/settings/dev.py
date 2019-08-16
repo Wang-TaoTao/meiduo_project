@@ -28,7 +28,9 @@ SECRET_KEY = 'a+8kxfmpdpwa&nlod%6i1m(9(r6npj_k-e-5gbrll%4sdi@e4b'
 # 开发模式
 DEBUG = True
 
-ALLOWED_HOSTS = []
+
+# 配置域名
+ALLOWED_HOSTS = ['www.meiduo.site','127.0.0.1']
 
 
 # Application definition
@@ -227,5 +229,7 @@ LOGGING = {
 import logging
 logger = logging.getLogger('django')
 
-# 配置域名
-ALLOWED_HOSTS = ['www.meiduo.site','127.0.0.1']
+
+
+# 指定本项目用户模型类
+AUTH_USER_MODEL = 'users.User'

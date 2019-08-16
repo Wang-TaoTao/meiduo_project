@@ -5,8 +5,10 @@ import sys
 if __name__ == "__main__":
     # 默认
     # os.environ.setdefault("DJANGO_SETTINGS_MODULE", "meiduo_mall.settings")
+
     # dev
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "meiduo_mall.settings.dev")
+
     # prod
     # os.environ.setdefault("DJANGO_SETTINGS_MODULE", "meiduo_mall.settings.prod")
     try:

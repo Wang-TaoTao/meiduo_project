@@ -9,7 +9,7 @@
 <body>
 	<div class="register_con">
 		<div class="l_con fl">
-			<a href="../static/index.html" class="reg_logo"><img src="../static/images/logo.png"></a>
+			<a href="../static/index.html" class="reg_logo"><img src="{{ static('images/logo.png') }}"></a>
 			<div class="reg_slogan">商品美 · 种类多 · 欢迎光临</div>
 			<div class="reg_banner"></div>
 		</div>
@@ -24,17 +24,17 @@
 				<ul>
 					<li>
 						<label>用户名:</label>
-						<input type="text" name="user_name" id="user_name">
+						<input type="text" name="username" id="user_name">
 						<span class="error_tip">请输入5-20个字符的用户</span>
 					</li>					
 					<li>
 						<label>密码:</label>
-						<input type="password" name="pwd" id="pwd">
+						<input type="password" name="password" id="pwd">
 						<span class="error_tip">请输入8-20位的密码</span>
 					</li>
 					<li>
 						<label>确认密码:</label>
-						<input type="password" name="cpwd" id="cpwd">
+						<input type="password" name="password2" id="cpwd">
 						<span class="error_tip">两次输入的密码不一致</span>
 					</li>
 					<li>
@@ -83,6 +83,6 @@
 		<p>CopyRight © 2016 北京美多商业股份有限公司 All Rights Reserved</p>
 		<p>电话：010-****888    京ICP备*******8号</p>
 	</div>
-	<script type="text/javascript" src="../static/js/register.js"></script>
+	<script type="text/javascript" src="register.js"></script>
 </body>
 </html>
