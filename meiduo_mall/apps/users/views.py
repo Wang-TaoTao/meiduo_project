@@ -4,15 +4,38 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.views import View
 from django import http
-
+from utils.response_code import RETCODE
 import re
 
 from apps.users.models import User
 from meiduo_mall.settings.dev import logger
 
 
+# 判断手机号是否重复
+
+class PhoneCountView(View):
+
+    def get(self,request,mobile):
+
+        phonecount = User.objects.filter(mobile = mobile).count()
+
+        return http.JsonResponse({'code':RETCODE.OK,'errmsg':'OK','count':phonecount})
 
 
+# 判断用户名是否重复
+
+
+
+class UserCountView(View):
+
+    def get(self,request,username):
+
+        usercount = User.objects.filter(username=username).count()
+
+        return http.JsonResponse({'code':RETCODE.OK,'errmsg':'OK','count':usercount})
+
+
+# 注册功能
 class RegisterView(View):
     """用户注册"""
 
@@ -67,7 +90,7 @@ class RegisterView(View):
         except Exception as e:
             logger.error(e)
 
-            return render(request,'register.html')
+            return render(request,'register.html',{'register_error': '注册失败'})
 
         # 保持会话登录状态
         login(request, user)

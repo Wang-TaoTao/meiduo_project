@@ -1,3 +1,5 @@
+
+
 var vm = new Vue({
     el: '#app',
     // 修改Vue变量的读取语法，避免和django模板语法冲突
@@ -64,24 +66,49 @@ var vm = new Vue({
                 this.error_name_message = '请输入5-20个字符的用户名';
                 this.error_name = true;
             }
-            // 检查重名
+            // 检查重名  //http://127.0.0.1:8000/usernames/wangtaotao1/count/
+            url = this.host + '/usernames/'+this.username + '/count/'
             if (this.error_name == false) {
-                var url = this.host + '/usernames/' + this.username + '/count/';
-                axios.get(url, {
-                    responseType: 'json'
+                axios.get(url,{
+                    responseType:'json',
+
+
                 })
-                    .then(response => {
-                        if (response.data.count > 0) {
-                            this.error_name_message = '用户名已存在';
-                            this.error_name = true;
-                        } else {
-                            this.error_name = false;
-                        }
+                    .then(response=>{
+                    if (response.data.count > 0){
+                        this.error_name_message = "用户名已经存在"
+                        this.error_name = true
+
+                    }else{
+                        this.error_name = false
+                    }
                     })
-                    .catch(error => {
-                        console.log(error.response);
-                    })
+                    .catch(error=>{
+                        console.log(error.response)
+
+                })
+
+
             }
+
+
+            // if (this.error_name == false) {
+            //     var url = this.host + '/usernames/' + this.username + '/count/';
+            //     axios.get(url, {
+            //         responseType: 'json'
+            //     })
+            //         .then(response => {
+            //             if (response.data.count > 0) {
+            //                 this.error_name_message = '用户名已存在';
+            //                 this.error_name = true;
+            //             } else {
+            //                 this.error_name = false;
+            //             }
+            //         })
+            //         .catch(error => {
+            //             console.log(error.response);
+            //         })
+            // }
         },
         // 检查密码
         check_pwd: function () {
@@ -96,6 +123,7 @@ var vm = new Vue({
         check_cpwd: function () {
             if (this.password != this.password2) {
                 this.error_check_password = true;
+                // this.error_password2_message = '输入密码不匹配';
             } else {
                 this.error_check_password = false;
             }
@@ -109,23 +137,50 @@ var vm = new Vue({
                 this.error_phone_message = '您输入的手机号格式不正确';
                 this.error_phone = true;
             }
-            if (this.error_phone == false) {
-                var url = this.host + '/mobiles/' + this.mobile + '/count/';
-                axios.get(url, {
-                    responseType: 'json'
+            // http://www.meiduo.site:8000/mobiles/15041890900/count/
+            url = this.host + '/mobiles/'+ this.mobile +'/count/'
+
+            if (this.error_phone == false){
+                axios.get(url,{
+                    responseType:'json'
                 })
                     .then(response => {
-                        if (response.data.count > 0) {
-                            this.error_phone_message = '手机号已存在';
-                            this.error_phone = true;
-                        } else {
-                            this.error_phone = false;
+                        if (response.data.count >0){
+                            this.error_phone_message = "该手机号已存在"
+                            this.error_phone = true
+
+                        }else{
+                            this.error_phone = false
                         }
                     })
                     .catch(error => {
-                        console.log(error.response);
+                        console.log(error.response)
                     })
             }
+
+
+
+
+
+
+
+            // if (this.error_phone == false) {
+            //     var url = this.host + '/mobiles/' + this.mobile + '/count/';
+            //     axios.get(url, {
+            //         responseType: 'json'
+            //     })
+            //         .then(response => {
+            //             if (response.data.count > 0) {
+            //                 this.error_phone_message = '手机号已存在';
+            //                 this.error_phone = true;
+            //             } else {
+            //                 this.error_phone = false;
+            //             }
+            //         })
+            //         .catch(error => {
+            //             console.log(error.response);
+            //         })
+            // }
         },
         // 检查图片验证码
         check_image_code: function () {

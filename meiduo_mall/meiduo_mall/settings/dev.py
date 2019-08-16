@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     'apps.users',
     # 注册contents首页子应用
     'apps.contents',
+    # 注册verifications子应用
+    'apps.verifications',
 ]
 
 MIDDLEWARE = [
@@ -166,20 +168,28 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR,'static')]
 
 # 配置Redis
 CACHES = {
-    "default": { # 默认
+    "default": { # 默认 0号库
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": "redis://127.0.0.1:6379/0",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     },
-    "session": { # session
+    "session": { # session  1号库
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": "redis://127.0.0.1:6379/1",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     },
+    "verify_image_code": { #  # 保存图片验证码--2号库
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/2",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    },
+
 }
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = "session"

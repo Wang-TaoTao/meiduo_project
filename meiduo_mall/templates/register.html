@@ -9,10 +9,14 @@
     <script type="text/javascript" src="../static/js/vue-2.5.16.js"></script>
 
     <script type="text/javascript" src="../static/js/host.js"></script>
+    <script src="../static/js/axios-0.18.0.min.js"></script>
 
 
 </head>
 <body>
+    {% if register_errmsg %}
+         <span class="error_tip2">{{ register_errmsg }} </span>
+    {% endif %}
     <div id = 'app'>
 	<div class="register_con">
 		<div class="l_con fl">
@@ -32,39 +36,39 @@
 					<li>
 						<label>用户名:</label>
 						<input  @blur = "check_username" v-model = "username"  type="text" name="username" id="user_name">
-						<span v-show= error_name class="error_tip">请输入5-20个字符的用户</span>
+						<span v-show= error_name class="error_tip">[[ error_name_message ]]</span>
 					</li>					
 					<li>
 						<label>密码:</label>
 						<input @blur = "check_pwd" v-model = "password" type="password" name="password" id="pwd">
-						<span v-show="error_password" class="error_tip">请输入8-20位的密码</span>
+						<span v-show="error_password" class="error_tip">[[ error_password_message ]]</span>
 					</li>
 					<li>
 						<label>确认密码:</label>
 						<input @blur = "check_cpwd" v-model = "password2" type="password" name="password2" id="cpwd">
-						<span v-show="error_password2" class="error_tip">两次输入的密码不一致</span>
+						<span v-show="error_check_password" class="error_tip">[[ error_password2_message ]]</span>
 					</li>
 					<li>
 						<label>手机号:</label>
 						<input @blur = "check_phone" v-model = "mobile" type="text" name="phone" id="phone">
-						<span v-show="error_phone" class="error_tip">请输入正确的手机号码</span>
+						<span v-show="error_phone" class="error_tip">[[ error_phone_message ]]</span>
 					</li>
 					<li>
                         <label>图形验证码:</label>
-                        <input @blur = "check_image_code" v-model = "img_code" type="text" name="pic_code" id="pic_code" class="msg_input">
+                        <input @blur = "check_image_code" v-model = "image_code" type="text" name="pic_code" id="pic_code" class="msg_input">
                         <img src="../static/images/pic_code.jpg" alt="图形验证码" class="pic_code">
-                        <span v-show="error_img_code" class="error_tip">请填写图形验证码</span>
+                        <span v-show="error_image_code" class="error_tip">[[ error_image_code_message ]]</span>
                     </li>
 					<li>
 						<label>短信验证码:</label>
 						<input @blur="check_sms_code" v-model = "sms_code" type="text" name="msg_code" id="msg_code" class="msg_input">
 						<a href="javascript:;" class="get_msg_code">获取短信验证码</a>
-						<span v-show= "error_sms_code" class="error_tip">请填写短信验证码</span>
+						<span v-show= "error_sms_code" class="error_tip">[[ error_sms_code_message ]]</span>
 					</li>
 					<li class="agreement">
-						<input type="checkbox" name="allow" id="allow" checked="checked">
+						<input @blur="check_allow" v-model ="allow" type="checkbox" name="allow" id="allow" checked="checked">
 						<label>同意”美多商城用户使用协议“</label>
-						<span class="error_tip">请勾选用户协议</span>
+						<span v-show = "error_allow" class="error_tip">[[ error_allow_message ]]</span>
 					</li>
 					<li class="reg_sub">
 						<input type="submit" value="注 册">

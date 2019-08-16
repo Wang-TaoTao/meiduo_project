@@ -25,4 +25,7 @@ urlpatterns = [
     # 配置content路由
     url(r'^', include('apps.contents.urls',namespace='users')),
 
+    # 配置verifications路由
+    url(r'^',include('apps.verifications.urls')),
+
 ]
