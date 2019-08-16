@@ -1,5 +1,5 @@
 # users 视图
-
+from django.contrib.auth import login
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.views import View
@@ -68,5 +68,9 @@ class RegisterView(View):
             logger.error(e)
 
             return render(request,'register.html')
+
+        # 保持会话登录状态
+        login(request, user)
+
         # 如果验证成功就跳转到首页
         return redirect(reverse('users:index'))
