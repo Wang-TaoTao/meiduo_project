@@ -21,7 +21,7 @@ class ImageCodeView(View):
         # 保存图片验证码
         from django_redis import get_redis_connection
         redis_client = get_redis_connection('verify_image_code')
-        redis_client.setex('img_%s' % uuid,300,text)
+        redis_client.setex(uuid,300,text)
 
         # 响应图片验证码
         return http.HttpResponse(image, content_type = 'image/jpeg')

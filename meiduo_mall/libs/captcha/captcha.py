@@ -217,4 +217,10 @@ class Captcha(object):
 captcha = Captcha.instance()
 
 if __name__ == '__main__':
+    text,image = captcha.generate_captcha()
+    print(text)
+    print(image)
     print(captcha.generate_captcha())
+
+    # with open('image_code.png','wb') as file:
+    #     file.write(image)

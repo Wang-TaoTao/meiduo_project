@@ -11,8 +11,10 @@ from apps.users.models import User
 from meiduo_mall.settings.dev import logger
 
 
-# 判断手机号是否重复
 
+
+
+# 判断手机号是否重复
 class PhoneCountView(View):
 
     def get(self,request,mobile):
@@ -23,9 +25,6 @@ class PhoneCountView(View):
 
 
 # 判断用户名是否重复
-
-
-
 class UserCountView(View):
 
     def get(self,request,username):
