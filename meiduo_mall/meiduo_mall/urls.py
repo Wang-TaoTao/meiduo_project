@@ -21,6 +21,8 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
 
     # 配置users路由
-    url(r'^', include('apps.users.urls',namespace='users')),
+    url(r'^', include('apps.users.urls')),
+    # 配置content路由
+    url(r'^', include('apps.contents.urls',namespace='users')),
 
 ]

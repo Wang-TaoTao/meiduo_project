@@ -45,6 +45,8 @@ INSTALLED_APPS = [
 
     # 注册users子应用
     'apps.users',
+    # 注册contents首页子应用
+    'apps.contents',
 ]
 
 MIDDLEWARE = [

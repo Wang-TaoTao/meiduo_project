@@ -1,6 +1,7 @@
 # users 视图
 
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.urls import reverse
 from django.views import View
 from django import http
 
@@ -8,6 +9,8 @@ import re
 
 from apps.users.models import User
 from meiduo_mall.settings.dev import logger
+
+
 
 
 class RegisterView(View):
@@ -65,5 +68,5 @@ class RegisterView(View):
             logger.error(e)
 
             return render(request,'register.html')
-
-        return http.HttpResponse("重定向成功，跳转到首页")
+        # 如果验证成功就跳转到首页
+        return redirect(reverse('users:index'))
