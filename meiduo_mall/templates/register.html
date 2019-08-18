@@ -16,7 +16,7 @@
 <body>
     {% if register_errmsg %}
          <span class="error_tip2">{{ register_errmsg }} </span>
-    {% else %}
+     {% endif %}
     <div id = 'app'>
 	<div class="register_con">
 		<div class="l_con fl">
@@ -53,22 +53,18 @@
 						<input @blur = "check_phone" v-model = "mobile" type="text" name="phone" id="phone">
 						<span v-show="error_phone" class="error_tip">[[ error_phone_message ]]</span>
 					</li>
-					<li>
-{#                        <label>图形验证码:</label>#}
-{#                        <input @blur = "check_image_code" v-model = "image_code" type="text" name="pic_code" id="pic_code" class="msg_input">#}
-{#                        <img src="../static/images/pic_code.jpg" alt="图形验证码" class="pic_code">#}
-{#                        <span v-show="error_image_code" class="error_tip">[[ error_image_code_message ]]</span>#}
+
                         <li>
                         <label>图形验证码:</label>
-                        <input type="text" name="image_code" id="pic_code" class="msg_input">
+                        <input @blur="check_image_code"  v-model = "image_code" type="text" name="image_code" id="pic_code" class="msg_input">
                         <img :src="image_code_url" @click="generate_image_code" alt="图形验证码" class="pic_code">
-                        <span class="error_tip">[[ error_image_code_message ]]</span>
-</li>
-                    </li>
+                        <span v-show = "error_image_code" class="error_tip">[[ error_image_code_message ]]</span>
+                        </li>
+
 					<li>
 						<label>短信验证码:</label>
 						<input @blur="check_sms_code" v-model = "sms_code" type="text" name="msg_code" id="msg_code" class="msg_input">
-						<a href="javascript:;" class="get_msg_code">获取短信验证码</a>
+						<a @click = "send_sms_code" href="javascript:;" class="get_msg_code">[[ sms_code_tip ]]</a>
 						<span v-show= "error_sms_code" class="error_tip">[[ error_sms_code_message ]]</span>
 					</li>
 					<li class="agreement">
@@ -102,7 +98,7 @@
 	</div>
 
     </div>
-    {% endif %}
+
 	<script type="text/javascript" src="../static/js/register.js"></script>
 </body>
 </html>

@@ -1,8 +1,60 @@
+# verfications 视图函数
+
 from django.shortcuts import render
 
-# Create your views here.
+
 from django.views import View
 from django import http
+from apps.verifications import constants
+from meiduo_mall.settings.dev import logger
+
+
+# 短信验证码
+class SMSCodeView(View):
+
+    def get(self,request,mobile):
+
+        # 接收uuid和用户输入的验证码
+        uuid = request.GET.get('image_code_id')
+        image_code = request.GET.get('image_code')
+        # 连接redis,根据uuid取出图片验证码
+        from django_redis import get_redis_connection
+        image_client_redis = get_redis_connection('verify_image_code')
+        image_code_redis = image_client_redis.get('img__%s' % uuid)
+
+        # 判None
+        if image_code_redis is None:
+            return http.JsonResponse({'code': "4001", 'errmsg': '图形验证码失效了'})
+
+        # 删除redis数据库中的uuid中的图片验证码
+        try:
+            image_client_redis.delete('img__%s' % uuid)
+        except Exception as e:
+            logger.error(e)
+
+        # 判断redis取出来的数据和用户输入的验证码是否相等
+        if image_code.lower() != image_code_redis.decode().lower():
+            return http.JsonResponse({'code': "4001", 'errmsg': '图形验证码有误'})
+
+        # 生成短信验证码
+        from random import randint
+        sms_code = "%06d" % randint(0,999999)
+        # 保存验证码到redis数据库
+        sms_client_redis = get_redis_connection('sms_code')
+        sms_client_redis.setex('sms_%s' % mobile ,300 ,sms_code)
+
+        # 使用第三方平台荣联云给手机号发短信
+        from libs.yuntongxun.sms import CCP
+        CCP().send_template_sms(mobile,[sms_code,5],1)
+        print("当前验证码是:",sms_code)
+        print("手机号:",mobile)
+
+        # 告诉前端 短信发送完毕
+        return http.JsonResponse({'code': '0', 'errmsg': '发送短信成功'})
+
+
+
+
 
 # 图形验证码
 class ImageCodeView(View):
@@ -18,10 +70,14 @@ class ImageCodeView(View):
         from libs.captcha.captcha import captcha
         text, image = captcha.generate_captcha()
 
+
         # 保存图片验证码
         from django_redis import get_redis_connection
         redis_client = get_redis_connection('verify_image_code')
-        redis_client.setex(uuid,300,text)
+        redis_client.setex('img__%s' % uuid,constants.IMAGE_CODE_REDIS_EXPIRES,text)
+
 
         # 响应图片验证码
         return http.HttpResponse(image, content_type = 'image/jpeg')
+
+

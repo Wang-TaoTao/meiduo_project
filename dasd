@@ -1,0 +1,13 @@
+[33mf5ceeea[m HEAD@{0}: commit: 实现图形验证码
+[33m54d4d46[m HEAD@{1}: commit: 实现用户名和手机号重复注册
+[33m0ee0394[m HEAD@{2}: commit: 实现用户名和手机号重复注册
+[33mfc67da5[m HEAD@{3}: commit: 实现登录状态保持
+[33mabb995d[m HEAD@{4}: commit: 注册成功跳转到首页
+[33m7937829[m HEAD@{5}: commit: 注册成功重定向到假首页
+[33mfb513cc[m HEAD@{6}: commit: 注册子应用
+[33mc6724b9[m HEAD@{7}: commit: 注册页面
+[33m2177c45[m HEAD@{8}: commit: 所有的包
+[33mfc348f6[m HEAD@{9}: commit: 修改settings文件
+[33m7d0fb2f[m HEAD@{10}: pull: Merge made by the 'recursive' strategy.
+[33me3dbe80[m HEAD@{11}: commit: 立项
+[33ma90ffc8[m HEAD@{12}: clone: from https://github.com/Wang-TaoTao/meiduo_project.git

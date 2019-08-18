@@ -14,4 +14,6 @@ urlpatterns = [
 
     # 手机号是否重复
     url(r'^mobiles/(?P<mobile>1[3-9]\d{9})/count/$',views.PhoneCountView.as_view()),
+
+
 ]

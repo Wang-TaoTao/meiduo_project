@@ -67,7 +67,7 @@ var vm = new Vue({
                 this.error_name = true;
             }
             // 检查重名  //http://127.0.0.1:8000/usernames/wangtaotao1/count/
-            url = this.host + '/usernames/'+this.username + '/count/'
+            url = this.host + '/usernames/'+this.username + '/count/';
             if (this.error_name == false) {
                 axios.get(url,{
                     responseType:'json',
@@ -76,7 +76,7 @@ var vm = new Vue({
                 })
                     .then(response=>{
                     if (response.data.count > 0){
-                        this.error_name_message = "用户名已经存在"
+                        this.error_name_message = "用户名已经存在";
                         this.error_name = true
 
                     }else{
@@ -138,7 +138,7 @@ var vm = new Vue({
                 this.error_phone = true;
             }
             // http://www.meiduo.site:8000/mobiles/15041890900/count/
-            url = this.host + '/mobiles/'+ this.mobile +'/count/'
+            url = this.host + '/mobiles/'+ this.mobile +'/count/';
 
             if (this.error_phone == false){
                 axios.get(url,{
@@ -146,7 +146,7 @@ var vm = new Vue({
                 })
                     .then(response => {
                         if (response.data.count >0){
-                            this.error_phone_message = "该手机号已存在"
+                            this.error_phone_message = "该手机号已存在";
                             this.error_phone = true
 
                         }else{

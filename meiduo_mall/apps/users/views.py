@@ -1,5 +1,9 @@
 # users 视图
+
+
+
 from django.contrib.auth import login
+from django.contrib.messages.storage import session
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.views import View
@@ -9,7 +13,6 @@ import re
 
 from apps.users.models import User
 from meiduo_mall.settings.dev import logger
-
 
 
 
@@ -58,6 +61,8 @@ class RegisterView(View):
         phone = request.POST.get('phone')
         allow = request.POST.get('allow')
 
+
+
         # 校验参数
         if not all([username, password, password2, phone, allow]):
 
@@ -79,6 +84,8 @@ class RegisterView(View):
 
             return http.HttpResponseForbidden("请输入正确的手机号！")
 
+
+
         if allow != "on":
 
             return http.HttpResponseForbidden("请勾选协议！")
@@ -93,6 +100,10 @@ class RegisterView(View):
 
         # 保持会话登录状态
         login(request, user)
+
+
+
+
 
         # 如果验证成功就跳转到首页
         return redirect(reverse('users:index'))
