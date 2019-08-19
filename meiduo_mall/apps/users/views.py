@@ -1,12 +1,14 @@
 # users 视图
 import json
 
+from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.messages.storage import session
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.views import View
 from django import http
+from itsdangerous import BadData
 
 from apps.verifications import constants
 from utils.response_code import RETCODE
@@ -16,6 +18,54 @@ from apps.users.models import User
 from meiduo_mall.settings.dev import logger
 from django.contrib.auth.mixins import LoginRequiredMixin
 
+# 验证链接提取用户信息
+def check_verify_email_token(token):
+    """
+    验证token并提取user
+    :param token: 用户信息签名后的结果
+    :return: user, None
+    """
+    from utils.secret import SecretOauth
+    try:
+        token_dict = SecretOauth().loads(token)
+    except BadData:
+        return None
+
+    try:
+        user = User.objects.get(id=token_dict['user_id'], email=token_dict['email'])
+    except Exception as e:
+        logger.error(e)
+        return None
+    else:
+        return user
+
+# 邮箱的验证
+class VerifyEmailView(View):
+    """验证邮箱"""
+
+    def get(self, request):
+        """实现邮箱验证逻辑"""
+        # 接收参数
+        token = request.GET.get('token')
+
+        # 校验参数：判断token是否为空和过期，提取user
+        if not token:
+            return http.HttpResponseBadRequest('缺少token')
+
+        user = check_verify_email_token(token)
+        if not user:
+            return http.HttpResponseForbidden('无效的token')
+
+        # 修改email_active的值为True
+        try:
+            user.email_active = True
+            user.save()
+        except Exception as e:
+            logger.error(e)
+            return http.HttpResponseServerError('激活邮件失败')
+
+        # 返回邮箱验证结果
+        return redirect(reverse('users:info'))
 
 
 # 邮箱
@@ -41,14 +91,22 @@ class EmailView(LoginRequiredMixin,View):
             request.user.save()
         except Exception as e:
             logger.error(e)
+
             return http.JsonResponse({'code': RETCODE.DBERR, 'errmsg': '添加邮箱失败'})
+
+        # 异步发送邮件
+
+        from apps.users.utils import generate_verify_email_url
+        verify_url = generate_verify_email_url(request.user)
+
+        from celery_tasks.email.tasks import send_verify_email
+        send_verify_email.delay(email,verify_url)
+
+
 
 
         # 响应添加邮箱结果
         return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '添加邮箱成功'})
-
-
-
 
 
 # 个人中心

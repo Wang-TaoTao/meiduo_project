@@ -22,9 +22,12 @@ urlpatterns = [
     url(r'^logout/',views.LogOutView.as_view()),
 
     # 个人中心
-    url(r'^info/',views.UserInfoView.as_view()),
+    url(r'^info/',views.UserInfoView.as_view(),name='info'),
 
     # 邮箱
-    url(r'^emails/',views.EmailView.as_view()),
+    url(r'^emails/$',views.EmailView.as_view()),
+
+    # /emails/verification/
+    url(r'^emails/verification/',views.VerifyEmailView.as_view()),
 
 ]
