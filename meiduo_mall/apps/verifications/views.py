@@ -10,6 +10,9 @@ from meiduo_mall.settings.dev import logger
 
 
 # 短信验证码
+from utils.response_code import RETCODE
+
+#  验证图片验证码和短信验证码
 class SMSCodeView(View):
 
     def get(self,request,mobile):
@@ -28,7 +31,7 @@ class SMSCodeView(View):
 
         # 删除redis数据库中的uuid中的图片验证码
         try:
-            image_client_redis.delete('img__%s' % uuid)
+            image_client_redis.delete('img_%s' % uuid)
         except Exception as e:
             logger.error(e)
 
@@ -41,19 +44,35 @@ class SMSCodeView(View):
         sms_code = "%06d" % randint(0,999999)
         # 保存验证码到redis数据库
         sms_client_redis = get_redis_connection('sms_code')
-        sms_client_redis.setex('sms_%s' % mobile ,300 ,sms_code)
+        # sms_client_redis.setex('sms_%s' % mobile ,300 ,sms_code)
+
+        # 避免频繁发送短信验证码
+        send_flag = sms_client_redis.get('send_flag_%s' % mobile)
+
+
+        if send_flag:
+            return http.JsonResponse({'code': RETCODE.THROTTLINGERR, 'errmsg': '发送短信过于频繁'})
+
+        # 创建Redis管道
+        pl = sms_client_redis.pipeline()
+        # 将Redis请求添加到队列
+        pl.setex('sms_%s' % mobile, constants.SMS_CODE_REDIS_EXPIRES, sms_code)
+        pl.setex('send_flag_%s' % mobile, constants.SEND_SMS_CODE_INTERVAL, 1)
+        # 执行请求
+        pl.execute()
 
         # 使用第三方平台荣联云给手机号发短信
-        from libs.yuntongxun.sms import CCP
-        CCP().send_template_sms(mobile,[sms_code,5],1)
+        # from libs.yuntongxun.sms import CCP
+        # CCP().send_template_sms(mobile,[sms_code,5],1)
+
+        # Celery异步发送短信验证码
+        from celery_tasks.sms.tasks import ccp_send_sms_code
+        ccp_send_sms_code.delay(mobile, sms_code)
         print("当前验证码是:",sms_code)
         print("手机号:",mobile)
 
         # 告诉前端 短信发送完毕
-        return http.JsonResponse({'code': '0', 'errmsg': '发送短信成功'})
-
-
-
+        return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '发送短信成功！'})
 
 
 # 图形验证码
@@ -69,7 +88,6 @@ class ImageCodeView(View):
         # 生成图片验证码
         from libs.captcha.captcha import captcha
         text, image = captcha.generate_captcha()
-
 
         # 保存图片验证码
         from django_redis import get_redis_connection

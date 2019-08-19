@@ -1,6 +1,5 @@
 # users 视图
-
-
+import json
 
 from django.contrib.auth import login
 from django.contrib.messages.storage import session
@@ -8,13 +7,135 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.views import View
 from django import http
+
+from apps.verifications import constants
 from utils.response_code import RETCODE
 import re
 
 from apps.users.models import User
 from meiduo_mall.settings.dev import logger
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 
+
+# 邮箱
+class EmailView(LoginRequiredMixin,View):
+
+    def put(self,request):
+        '''实现邮箱添加逻辑'''
+
+        # 接收参数
+        json_str = request.body.decode()
+        json_dict = json.loads(json_str)
+        email = json_dict['email']
+        print("邮箱是:",email)
+
+
+        # 校验参数
+        if not re.match(r'^[a-z0-9][\w\.\-]*@[a-z0-9\-]+(\.[a-z]{2,5}){1,2}$', email):
+            return http.HttpResponseForbidden('参数email有误')
+
+        # 赋值email字段
+        try:
+            request.user.email = email
+            request.user.save()
+        except Exception as e:
+            logger.error(e)
+            return http.JsonResponse({'code': RETCODE.DBERR, 'errmsg': '添加邮箱失败'})
+
+
+        # 响应添加邮箱结果
+        return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '添加邮箱成功'})
+
+
+
+
+
+# 个人中心
+class UserInfoView(LoginRequiredMixin,View):
+
+    def get(self,request):
+        '''提供个人信息界面'''
+        context = {
+            'username':request.user.username,
+            'mobile':request.user.mobile,
+            'email':request.user.email,
+            'eamil_active':request.user.email_active,
+        }
+
+
+        return render(request,'user_center_info.html',context=context)
+
+
+
+# 登录功能
+class LoginView(View):
+
+    def get(self,request):
+        '''登录界面'''
+        return render(request,'login.html')
+
+
+    def post(self,request):
+
+        '''验证参数'''
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        remembered = request.POST.get('remembered')
+
+
+        if not all([username,password]):
+            return http.HttpResponseForbidden("请将信息填写完整！")
+
+        if not re.match(r'^[a-zA-Z0-9_-]{5,20}$',username):
+            return http.HttpResponseForbidden("请输入5-20个字符的用户名！")
+
+        if not re.match(r'^[0-9A-Za-z]{8,20}$',password):
+            return http.HttpResponseForbidden("请输入8-20个字符的密码！")
+
+        from django.contrib.auth import authenticate,login
+        user = authenticate(username=username,password=password)
+
+        if user is None:
+
+            return render(request,'login.html',{'account_errmsg':"用户名或密码错误"})
+
+        # 保持登陆状态
+        login(request,user)
+
+        # 是否记住用户名
+        if remembered == 'on':
+            request.session.set_expiry(None)
+
+        else:
+            request.session.set_expiry(0)
+
+        # 翻转首页 next
+        next = request.GET.get('next')
+        if next:
+
+            response = redirect(next)
+        else:
+            response = redirect(reverse('contents:index'))
+
+
+        response.set_cookie('username',user.username,max_age=3600*24*15)
+
+        # 返回响应结果
+        return response
+
+
+# 退出
+class LogOutView(View):
+
+    def get(self,request):
+
+        from django.contrib.auth import logout
+        logout(request)
+
+        response = redirect(reverse('users:login'))
+        response.delete_cookie('username')
+        return response
 
 
 # 判断手机号是否重复
@@ -58,13 +179,12 @@ class RegisterView(View):
         username = request.POST.get('username')
         password = request.POST.get('password')
         password2 = request.POST.get('password2')
-        phone = request.POST.get('phone')
+        mobile = request.POST.get('mobile')
         allow = request.POST.get('allow')
 
 
-
         # 校验参数
-        if not all([username, password, password2, phone, allow]):
+        if not all([username, password, password2, mobile, allow]):
 
             return http.HttpResponseForbidden("缺少参数，请把信息输入完整！")
 
@@ -80,18 +200,36 @@ class RegisterView(View):
 
             return http.HttpResponseForbidden("请输入相同的密码！")
 
-        if not re.match(r'^1[345789]\d{9}$',phone):
+        if not re.match(r'^1[345789]\d{9}$',mobile):
 
             return http.HttpResponseForbidden("请输入正确的手机号！")
 
+        # 短信验证
+        sms_code = request.POST.get('msg_code')
+        from django_redis import get_redis_connection
+        sms_code_redis = get_redis_connection('sms_code')
+        redis_sms_code = sms_code_redis.get('sms_%s' % mobile)
 
+        # 判空
+        if redis_sms_code is None:
+            return render(request, 'register.html', {'sms_code_errmsg': '无效的短信验证码'})
+        # 对比验证码
+        if sms_code.lower() != redis_sms_code.decode().lower():
+            return render(request, 'register.html', {'sms_code_errmsg': '输入短信验证码有误'})
+
+
+
+        # # 保存短信验证码
+        # sms_code_redis.setex('sms_%s' % phone,constants.SMS_CODE_REDIS_EXPRES,sms_code)
+        # # 重新写入send_flag
+        # sms_code_redis.setex('send_flag_%s' % phone,constants.SEND_SMS_CODE_INTERVAL,1)
 
         if allow != "on":
 
             return http.HttpResponseForbidden("请勾选协议！")
 
         try:
-            user = User.objects.create_user(username=username,password=password,mobile=phone)
+            user = User.objects.create_user(username=username,password=password,mobile=mobile)
 
         except Exception as e:
             logger.error(e)
@@ -102,8 +240,7 @@ class RegisterView(View):
         login(request, user)
 
 
-
-
-
         # 如果验证成功就跳转到首页
-        return redirect(reverse('users:index'))
+        response = redirect(reverse('contents:index'))
+        response.set_cookie('username',user.username,max_age=3600*24*15)
+        return response

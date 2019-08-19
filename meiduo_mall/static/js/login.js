@@ -54,6 +54,9 @@ var vm = new Vue({
                 .catch(error => {
                     console.log(error.response);
                 })
-        }
+        },
+
+
     }
+
 });

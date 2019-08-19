@@ -252,3 +252,13 @@ logger = logging.getLogger('django')
 
 # 指定本项目用户模型类
 AUTH_USER_MODEL = 'users.User'
+
+
+
+# 判断用户是否登陆路由
+LOGIN_URL = '/login/'
+
+
+# 指定自定义的用户认证后端
+AUTHENTICATION_BACKENDS = ['apps.users.utils.UsernameMobileAuthBackend']
+

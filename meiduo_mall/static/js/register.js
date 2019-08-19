@@ -194,7 +194,7 @@ var vm = new Vue({
         },
         // 检查短信验证码
         check_sms_code: function () {
-            if (!this.sms_code) {
+            if (!this.sms_code.length != 6) {
                 this.error_sms_code_message = '请填写短信验证码';
                 this.error_sms_code = true;
             } else {
@@ -234,6 +234,7 @@ var vm = new Vue({
                     // 表示后端发送短信成功
                     if (response.data.code == '0') {
                         // 倒计时60秒，60秒后允许用户再次点击发送短信验证码的按钮
+
                         var num = 60;
                         // 设置一个计时器
                         var t = setInterval(() => {
@@ -248,13 +249,15 @@ var vm = new Vue({
                                 num -= 1;
                                 // 展示倒计时信息
                                 this.sms_code_tip = num + '秒';
+
                             }
                         }, 1000, 60)
                     } else {
                         if (response.data.code == '4001') {
                             this.error_image_code_message = response.data.errmsg;
                             this.error_image_code = true;
-                        } else { // 4002
+                        }
+                        else { // 4002
                             this.error_sms_code_message = response.data.errmsg;
                             this.error_sms_code = true;
                         }
