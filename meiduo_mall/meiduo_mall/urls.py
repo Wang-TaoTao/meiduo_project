@@ -28,4 +28,7 @@ urlpatterns = [
     # 配置verifications路由
     url(r'^',include('apps.verifications.urls')),
 
+    # 配置oauth路由
+    url(r'^',include('apps.oauth.urls')),
+
 ]

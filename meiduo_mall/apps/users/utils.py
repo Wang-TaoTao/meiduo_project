@@ -7,21 +7,22 @@ from apps.users.models import User
 
 
 
-# 定义生成邮箱验证连接方法
+# 邮箱token加密后拼接url
 def generate_verify_email_url(user):
-
+    """
+    :param user: 用户对象
+    :return:
+    """
     # 1.加密的数据
-    data_dict = {'user_id':user.id,'email':user.email}
+    data_dict = {'user_id': user.id, 'email': user.email}
 
-    # 2.进行加密数据
+    # 2. 进行加密数据
     from utils.secret import SecretOauth
     secret_data = SecretOauth().dumps(data_dict)
 
-
-    # 3.返回拼接url
+    # 3. 返回拼接url
     active_url = settings.EMAIL_ACTIVE_URL + '?token=' + secret_data
     return active_url
-
 
 
 

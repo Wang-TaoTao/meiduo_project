@@ -39,8 +39,10 @@ def check_verify_email_token(token):
     else:
         return user
 
+
+
 # 邮箱的验证
-class VerifyEmailView(View):
+class VerifyEmailView(LoginRequiredMixin,View):
     """验证邮箱"""
 
     def get(self, request):
@@ -58,8 +60,8 @@ class VerifyEmailView(View):
 
         # 修改email_active的值为True
         try:
-            user.email_active = True
-            user.save()
+            request.user.email_active = True
+            request.user.save()
         except Exception as e:
             logger.error(e)
             return http.HttpResponseServerError('激活邮件失败')
@@ -91,16 +93,14 @@ class EmailView(LoginRequiredMixin,View):
             request.user.save()
         except Exception as e:
             logger.error(e)
-
             return http.JsonResponse({'code': RETCODE.DBERR, 'errmsg': '添加邮箱失败'})
 
-        # 异步发送邮件
+        # 4.异步发送邮件
 
         from apps.users.utils import generate_verify_email_url
         verify_url = generate_verify_email_url(request.user)
-
         from celery_tasks.email.tasks import send_verify_email
-        send_verify_email.delay(email,verify_url)
+        send_verify_email.delay(email, verify_url)
 
 
 
@@ -118,7 +118,7 @@ class UserInfoView(LoginRequiredMixin,View):
             'username':request.user.username,
             'mobile':request.user.mobile,
             'email':request.user.email,
-            'eamil_active':request.user.email_active,
+            'email_active':request.user.email_active,
         }
 
 
