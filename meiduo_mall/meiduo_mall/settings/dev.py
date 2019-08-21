@@ -52,6 +52,11 @@ INSTALLED_APPS = [
     'apps.verifications',
     # 注册oauth，QQ登录子应用
     'apps.oauth',
+    # 注册areas，收货地址子应用
+    'apps.areas',
+    # 注册goods，首页商品子应用
+    'apps.goods',
+
 ]
 
 MIDDLEWARE = [

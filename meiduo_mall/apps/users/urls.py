@@ -27,7 +27,10 @@ urlpatterns = [
     # 邮箱
     url(r'^emails/$',views.EmailView.as_view()),
 
-    # /emails/verification/
+    # 邮箱的验证 /emails/verification/
     url(r'^emails/verification/',views.VerifyEmailView.as_view()),
+
+    # 显示收货地址
+    url(r'^address/',views.AddressView.as_view()),
 
 ]

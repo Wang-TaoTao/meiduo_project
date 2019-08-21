@@ -10,6 +10,7 @@ from django.views import View
 from django import http
 from itsdangerous import BadData
 
+from apps.areas.models import Address
 from apps.verifications import constants
 from utils.response_code import RETCODE
 import re
@@ -18,7 +19,48 @@ from apps.users.models import User
 from meiduo_mall.settings.dev import logger
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-# 验证链接提取用户信息
+
+
+
+
+
+# 用户收货地址
+class AddressView(View):
+
+    def get(self,request):
+        '''提供收货地址界面'''
+        # 获取用户地址列表
+        login_user = request.user
+        addresses = Address.objects.filter(user=login_user,is_deleted=False)
+
+        address_list = []
+        for address in addresses:
+            address_list.append(
+                {
+                "id": address.id,
+                "title": address.title,
+                "receiver": address.receiver,
+                "province": address.province.name,
+                "city": address.city.name,
+                "district": address.district.name,
+                "place": address.place,
+                "mobile": address.mobile,
+                "tel": address.tel,
+                "email": address.email
+
+                }
+            )
+        context = {
+            'default_address_id':login_user.default_address_id,
+            'addresses':address_list
+        }
+        return render(request, 'user_center_site.html', context)
+
+
+
+
+
+# 验证链接提取user信息
 def check_verify_email_token(token):
     """
     验证token并提取user
@@ -95,10 +137,12 @@ class EmailView(LoginRequiredMixin,View):
             logger.error(e)
             return http.JsonResponse({'code': RETCODE.DBERR, 'errmsg': '添加邮箱失败'})
 
-        # 4.异步发送邮件
 
+        # 拼接url
         from apps.users.utils import generate_verify_email_url
         verify_url = generate_verify_email_url(request.user)
+
+        # 4.异步发送邮件
         from celery_tasks.email.tasks import send_verify_email
         send_verify_email.delay(email, verify_url)
 
@@ -107,6 +151,9 @@ class EmailView(LoginRequiredMixin,View):
 
         # 响应添加邮箱结果
         return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '添加邮箱成功'})
+
+
+
 
 
 # 个人中心
@@ -123,7 +170,6 @@ class UserInfoView(LoginRequiredMixin,View):
 
 
         return render(request,'user_center_info.html',context=context)
-
 
 
 # 登录功能

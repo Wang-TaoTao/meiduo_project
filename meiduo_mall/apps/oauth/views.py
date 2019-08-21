@@ -17,6 +17,9 @@ from utils.response_code import RETCODE
 from django import http
 from utils.secret import SecretOauth
 
+
+
+
 # 提供QQ登录页面网址
 class QQAuthURLView(View):
     """提供QQ登录页面网址
@@ -31,6 +34,8 @@ class QQAuthURLView(View):
         login_url = oauth.get_qq_url()
 
         return http.JsonResponse({'code': RETCODE.OK, 'errmsg': 'OK', 'login_url':login_url})
+
+
 
 
 # 用户扫码登录的回调处理
@@ -79,6 +84,7 @@ class QQAuthUserView(View):
             response.set_cookie('username', qq_user.username, max_age=3600 * 24 * 15)
 
             return response
+
 
     def post(self, request):
         """美多商城用户绑定到openid"""
