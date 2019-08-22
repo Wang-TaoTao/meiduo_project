@@ -8,4 +8,5 @@ urlpatterns = [
 
   # 首页子路由
   url('^$',views.IndexView.as_view(),name='index'),
+
 ]

@@ -285,3 +285,12 @@ EMAIL_ACTIVE_URL = 'http://www.meiduo.site:8000/emails/verification/' #激活地
 QQ_CLIENT_ID = '101518219'
 QQ_CLIENT_SECRET = '418d84ebdc7241efb79536886ae95224'
 QQ_REDIRECT_URI = 'http://www.meiduo.site:8000/oauth_callback'
+
+
+
+# 指定自定义的Django文件存储类
+DEFAULT_FILE_STORAGE = 'utils.fastdfs.fastdfs_storage.FastDFSStorage'
+
+# FastDFS相关参数
+# FDFS_BASE_URL = 'http://192.168.130.12/:8888/'
+PDFS_BASE_URL = 'http://image.meiduo.site:8888/'
