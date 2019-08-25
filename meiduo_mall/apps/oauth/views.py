@@ -1,3 +1,5 @@
+# oauth 视图
+
 import re
 
 from QQLoginTool.QQtool import OAuthQQ

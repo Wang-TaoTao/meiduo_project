@@ -11,7 +11,7 @@ urlpatterns = [
   url(r'^areas/',views.AreasView.as_view()),
 
   # 新增收货地址
-  url(r'^address/create/$',views.CreateAddressView.as_view()),
+  url(r'^addresses/create/$',views.CreateAddressView.as_view()),
 
   # 修改和删除收货地址
   url(r'^addresses/(?P<address_id>\d+)/$',views.UpdateDestroyAddressView.as_view()),

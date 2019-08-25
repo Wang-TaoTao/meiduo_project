@@ -1,4 +1,5 @@
 # users 视图
+
 import json
 
 from django.conf import settings
@@ -9,12 +10,11 @@ from django.urls import reverse
 from django.views import View
 from django import http
 from itsdangerous import BadData
-
 from apps.areas.models import Address
+
 from apps.verifications import constants
 from utils.response_code import RETCODE
 import re
-
 from apps.users.models import User
 from meiduo_mall.settings.dev import logger
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -55,8 +55,6 @@ class AddressView(View):
             'addresses':address_list
         }
         return render(request, 'user_center_site.html', context)
-
-
 
 
 
@@ -112,6 +110,7 @@ class VerifyEmailView(LoginRequiredMixin,View):
         return redirect(reverse('users:info'))
 
 
+
 # 邮箱
 class EmailView(LoginRequiredMixin,View):
 
@@ -147,12 +146,8 @@ class EmailView(LoginRequiredMixin,View):
         send_verify_email.delay(email, verify_url)
 
 
-
-
-        # 响应添加邮箱结果
+        # 5.响应添加邮箱结果
         return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '添加邮箱成功'})
-
-
 
 
 
@@ -172,6 +167,7 @@ class UserInfoView(LoginRequiredMixin,View):
         return render(request,'user_center_info.html',context=context)
 
 
+
 # 登录功能
 class LoginView(View):
 
@@ -182,12 +178,12 @@ class LoginView(View):
 
     def post(self,request):
 
-        '''验证参数'''
+        # 接收参数
         username = request.POST.get('username')
         password = request.POST.get('password')
         remembered = request.POST.get('remembered')
 
-
+        # 校验参数
         if not all([username,password]):
             return http.HttpResponseForbidden("请将信息填写完整！")
 
@@ -197,6 +193,7 @@ class LoginView(View):
         if not re.match(r'^[0-9A-Za-z]{8,20}$',password):
             return http.HttpResponseForbidden("请输入8-20个字符的密码！")
 
+        # 校验账户
         from django.contrib.auth import authenticate,login
         user = authenticate(username=username,password=password)
 
@@ -223,10 +220,16 @@ class LoginView(View):
             response = redirect(reverse('contents:index'))
 
 
+        # 实现合并购物车
+        from apps.carts.utils import merge_cart_cookie_to_redis
+        response = merge_cart_cookie_to_redis(request,response,user)
+
+
         response.set_cookie('username',user.username,max_age=3600*24*15)
 
         # 返回响应结果
         return response
+
 
 
 # 退出
@@ -242,6 +245,7 @@ class LogOutView(View):
         return response
 
 
+
 # 判断手机号是否重复
 class PhoneCountView(View):
 
@@ -252,6 +256,7 @@ class PhoneCountView(View):
         return http.JsonResponse({'code':RETCODE.OK,'errmsg':'OK','count':phonecount})
 
 
+
 # 判断用户名是否重复
 class UserCountView(View):
 
@@ -260,6 +265,7 @@ class UserCountView(View):
         usercount = User.objects.filter(username=username).count()
 
         return http.JsonResponse({'code':RETCODE.OK,'errmsg':'OK','count':usercount})
+
 
 
 # 注册功能

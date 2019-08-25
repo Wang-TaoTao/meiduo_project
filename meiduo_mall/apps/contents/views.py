@@ -1,3 +1,5 @@
+# contents 视图
+
 from collections import OrderedDict
 
 from django.shortcuts import render

@@ -6,7 +6,7 @@ from django.conf.urls import url
 from . import views
 urlpatterns = [
 
-    # qq 专门负责返回登录网址
+    # 专门负责返回QQ登录网址
     url(r'^qq/login/$',views.QQAuthURLView.as_view()),
 
     # 接收QQ返回来的code

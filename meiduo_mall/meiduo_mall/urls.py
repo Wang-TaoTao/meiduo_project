@@ -34,4 +34,13 @@ urlpatterns = [
     # 配置areas路由
     url(r'^',include('apps.areas.urls')),
 
+    # 配置goods路由
+    url(r'^',include('apps.goods.urls',namespace='goods')),
+
+    # 配置carts路由
+    url(r'^',include('apps.carts.urls')),
+
+    # 配置haystack 对接搜索引擎的框架总路由
+    url(r'^search/', include('haystack.urls')),
+
 ]

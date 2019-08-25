@@ -31,7 +31,7 @@
 					<span>|</span>
 					<a href="/info/">用户中心</a>
 					<span>|</span>
-					<a href="../static/cart.html">我的购物车</a>
+					<a href="cart.html">我的购物车</a>
 					<span>|</span>
 					<a href="../static/user_center_order.html">我的订单</a>
 				</div>
@@ -107,7 +107,7 @@
 
 						<div class="group_detail fl">
                         {% for cat3 in cat2.sub_cats %}
-							<a href="../static/list.html">{{ cat3.name }}</a>
+							<a href="/list/{{ cat3.id }}/1">{{ cat3.name }}</a>
 
 							{% endfor %}
 

@@ -12,6 +12,11 @@ from meiduo_mall.settings.dev import logger
 # 短信验证码
 from utils.response_code import RETCODE
 
+
+
+
+
+
 #  验证图片验证码和短信验证码
 class SMSCodeView(View):
 
@@ -73,6 +78,8 @@ class SMSCodeView(View):
 
         # 告诉前端 短信发送完毕
         return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '发送短信成功！'})
+
+
 
 
 # 图形验证码

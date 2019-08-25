@@ -56,6 +56,11 @@ INSTALLED_APPS = [
     'apps.areas',
     # 注册goods，首页商品子应用
     'apps.goods',
+    # 注册carts，购物车子应用
+    'apps.carts',
+
+    # 注册第三方Haystack，对接搜索引擎的框架
+    'haystack',
 
 ]
 
@@ -190,7 +195,7 @@ CACHES = {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     },
-    "verify_image_code": { #  # 保存图片验证码--2号库
+    "verify_image_code": {   # 保存图片验证码--2号库
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": "redis://127.0.0.1:6379/2",
         "OPTIONS": {
@@ -202,6 +207,20 @@ CACHES = {
         "LOCATION": "redis://127.0.0.1:6379/3",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    },
+    "history": {  # 用户浏览记录--4号库
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/4",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    },
+    "carts": {   # 购物车数据--5号库
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/5",
+        "OPTIONS": {
+        "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     },
 
@@ -223,13 +242,13 @@ LOGGING = {
             'format': '%(levelname)s %(module)s %(lineno)d %(message)s'
         },
     },
-    'filters': {  # 对日志进行过滤
-        'require_debug_true': {  # django在debug模式下才输出日志
+        'filters': {  # 对日志进行过滤
+            'require_debug_true': {  # django在debug模式下才输出日志
             '()': 'django.utils.log.RequireDebugTrue',
         },
     },
-    'handlers': {  # 日志处理方法
-        'console': {  # 向终端中输出日志
+        'handlers': {  # 日志处理方法
+            'console': {  # 向终端中输出日志
             'level': 'INFO',
             'filters': ['require_debug_true'],
             'class': 'logging.StreamHandler',
@@ -244,13 +263,15 @@ LOGGING = {
             'formatter': 'verbose'
         },
     },
-    'loggers': {  # 日志器
-        'django': {  # 定义了一个名为django的日志器
+        'loggers': {  # 日志器
+            'django': {  # 定义了一个名为django的日志器
             'handlers': ['console', 'file'],  # 可以同时向终端与文件中输出日志
             'propagate': True,  # 是否继续传递日志信息
             'level': 'INFO',  # 日志器接收的最低日志级别
         },
-    }
+    },
+
+
 }
 # 实例化日志对象
 import logging
@@ -294,3 +315,19 @@ DEFAULT_FILE_STORAGE = 'utils.fastdfs.fastdfs_storage.FastDFSStorage'
 # FastDFS相关参数
 # FDFS_BASE_URL = 'http://192.168.130.12/:8888/'
 PDFS_BASE_URL = 'http://image.meiduo.site:8888/'
+
+
+# Haystack
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
+        'URL': 'http://192.168.130.128:9200/', # Elasticsearch服务器ip地址，端口号固定为9200
+        'INDEX_NAME': 'meiduo', # Elasticsearch建立的索引库的名称
+    },
+}
+
+
+# 当添加、修改、删除数据时，自动生成索引
+HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
+
+

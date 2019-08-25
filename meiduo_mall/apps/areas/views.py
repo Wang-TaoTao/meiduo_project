@@ -1,3 +1,5 @@
+# areas 视图
+
 import json
 import re
 
@@ -15,6 +17,8 @@ from apps.areas.models import Area, Address
 from apps.verifications import constants
 from meiduo_mall.settings.dev import logger
 from utils.response_code import RETCODE
+
+
 
 
 
@@ -70,6 +74,7 @@ class ChangePasswordView(LoginRequiredMixin,View):
 
 
 
+
 # 修改地址标题
 class UpdateTitleAddressView(LoginRequiredMixin,View):
 
@@ -96,6 +101,7 @@ class UpdateTitleAddressView(LoginRequiredMixin,View):
 
 
 
+
 # 设置默认收货地址
 class DefaultAddressView(LoginRequiredMixin,View):
     # 设置默认收货地址
@@ -115,6 +121,7 @@ class DefaultAddressView(LoginRequiredMixin,View):
 
         # 响应设置默认地址结果
         return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '设置默认地址成功'})
+
 
 
 
@@ -204,6 +211,8 @@ class UpdateDestroyAddressView(LoginRequiredMixin,View):
         return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '删除地址成功'})
 
 
+
+
 # 新增收货地址
 class CreateAddressView(LoginRequiredMixin,View):
 
@@ -282,6 +291,7 @@ class CreateAddressView(LoginRequiredMixin,View):
 
         # 返回响应结果给前端
         return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '新增地址成功', 'address': address_dict})
+
 
 
 
