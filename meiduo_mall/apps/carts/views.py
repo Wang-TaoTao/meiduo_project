@@ -11,6 +11,11 @@ from utils.response_code import RETCODE
 
 
 
+
+
+
+
+
 # 展示商品页面简单购物车
 class CartsSimpleView(View):
 
@@ -50,9 +55,10 @@ class CartsSimpleView(View):
         # 获取键
         sku_ids = carts_dict.keys()
         # 根据键获取表中商品信息
-        skus = SKU.objects.filter(id__in = sku_ids)
+        # skus = SKU.objects.filter(id__in = sku_ids)
         # 遍历商品信息
-        for sku in skus:
+        for sku_id in sku_ids:
+            sku = SKU.objects.get(id=sku_id)
             cart_skus.append({
                 'id':sku.id,
                 'name':sku.name,
@@ -273,10 +279,11 @@ class CartsView(View):
         sku_ids = carts_dict.keys()
 
         # 4根据sku_id取出所有商品对象
-        skus_data = SKU.objects.filter(id__in=sku_ids)
+        # skus_data = SKU.objects.filter(id__in=sku_ids)
         cart_skus= []
         # 5遍历商品对象
-        for sku in skus_data:
+        for sku_id in sku_ids:
+            sku = SKU.objects.get(id = sku_id)
             cart_skus.append({
                 'id': sku.id,
                 'name': sku.name,

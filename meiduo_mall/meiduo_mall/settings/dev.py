@@ -58,6 +58,8 @@ INSTALLED_APPS = [
     'apps.goods',
     # 注册carts，购物车子应用
     'apps.carts',
+    # 注册order，订单子应用
+    'apps.orders',
 
     # 注册第三方Haystack，对接搜索引擎的框架
     'haystack',
@@ -321,7 +323,7 @@ PDFS_BASE_URL = 'http://image.meiduo.site:8888/'
 HAYSTACK_CONNECTIONS = {
     'default': {
         'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
-        'URL': 'http://192.168.130.128:9200/', # Elasticsearch服务器ip地址，端口号固定为9200
+        'URL': 'http://192.168.130.129:9200/', # Elasticsearch服务器ip地址，端口号固定为9200
         'INDEX_NAME': 'meiduo', # Elasticsearch建立的索引库的名称
     },
 }

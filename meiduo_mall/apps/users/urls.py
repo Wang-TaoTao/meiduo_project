@@ -31,6 +31,6 @@ urlpatterns = [
     url(r'^emails/verification/',views.VerifyEmailView.as_view()),
 
     # 显示收货地址
-    url(r'^address/',views.AddressView.as_view()),
+    url(r'^address/',views.AddressView.as_view(),name='address'),
 
 ]

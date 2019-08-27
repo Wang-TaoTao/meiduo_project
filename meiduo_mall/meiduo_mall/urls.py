@@ -40,6 +40,9 @@ urlpatterns = [
     # 配置carts路由
     url(r'^',include('apps.carts.urls')),
 
+    # 配置orders路由
+    url(r'^',include('apps.orders.urls')),
+
     # 配置haystack 对接搜索引擎的框架总路由
     url(r'^search/', include('haystack.urls')),
 
