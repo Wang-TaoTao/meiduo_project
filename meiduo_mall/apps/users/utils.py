@@ -41,7 +41,7 @@ def get_user_by_account(account):
             # 用户名登录
             user = User.objects.get(username = account)
 
-    except Exception as e:
+    except User.DoesNotExist:
         return None
 
     else:

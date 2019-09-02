@@ -33,4 +33,7 @@ urlpatterns = [
     # 显示收货地址
     url(r'^address/',views.AddressView.as_view(),name='address'),
 
+    # 忘记密码页面
+    url(r'^find_password/$',views.FindPwdView.as_view()),
+
 ]

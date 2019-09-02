@@ -18,6 +18,7 @@ let vm = new Vue({
         cart_total_count: 0,
         carts: [],
         comments: [],
+        count:[],
         score_classes: {
             1: 'stars_one',
             2: 'stars_two',
@@ -100,6 +101,9 @@ let vm = new Vue({
                     })
             }
         },
+
+
+
         // 记录分类商品的访问量
 		goods_visit_count(){
         	if (this.category_id) {
@@ -183,7 +187,7 @@ let vm = new Vue({
                     console.log(error.response);
                 })
         },
-        // 获取商品评价信息
+        // 获取商品评价信息 (原)
         get_goods_comment(){
             if (this.sku_id) {
                 let url = '/comments/'+ this.sku_id +'/';
@@ -191,7 +195,8 @@ let vm = new Vue({
                     responseType: 'json'
                 })
                     .then(response => {
-                        this.comments = response.data.comment_list;
+                        this.comments = response.data.comments;
+                        this.count = response.data.count;
                         for(let i=0; i<this.comments.length; i++){
                             this.comments[i].score_class = this.score_classes[this.comments[i].score];
                         }

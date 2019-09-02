@@ -14,8 +14,6 @@ from utils.response_code import RETCODE
 
 
 
-
-
 # 展示商品页面简单购物车
 class CartsSimpleView(View):
 
@@ -79,7 +77,7 @@ class CartsSelectAllView(View):
 
         # 接收参数
         json_dict = json.loads(request.body.decode())
-        selected = json_dict.get('selected')
+        selected = json_dict.get('selected',True)
 
         # 校验参数
         if selected:
@@ -156,13 +154,13 @@ class CartsView(View):
             return http.HttpResponseForbidden('缺少必传参数')
         # 2.2校验stu_id商品是否存在
         try:
-            sku = SKU.objects.get(id=sku_id)
+            SKU.objects.get(id=sku_id)
         except SKU.DoesNotExist:
             return http.HttpResponseForbidden('商品不存在')
         # 2.3校验count是否为整形
         try:
-            count != int(count)
-        except Exception as e:
+            count = int(count)
+        except Exception:
             return http.HttpResponseForbidden('参数count有误')
         # 2.4校验selected
         if selected:
@@ -184,23 +182,23 @@ class CartsView(View):
                 # 3.1如果不存在 则直接新增记录
                 redis_conn.hset(user.id,sku_id,json.dumps({"count":count,"selected":selected}))
             # 4如果用户数据在redis中存在，则判断商品是否已经在购物车中
-            if str(sku_id).encode in carts_dict:
+            if str(sku_id).encode() in carts_dict:
                 # 4.1取出商品数据
-                child_dict = json.loads(carts_dict[str(sku_id).encode].decode())
+                child_dict = json.loads(carts_dict[str(sku_id).encode()].decode())
 
                 # 4.2新增当前商品的个数
-                carts_dict['count'] += count
+                child_dict['count'] += count
 
                 # 4.3更新数据
-                redis_conn.hset(user.id,sku_id,json.dumps(carts_dict))
+                redis_conn.hset(user.id,sku_id,json.dumps(child_dict))
 
             # 5如果用户数据在redis中不存在
             else:
                 # 5.1则直接更新数据
-                carts_dict = redis_conn.hset(user.id,sku.id,json.dumps({"count":count,"selecetd":selected}))
+                redis_conn.hset(user.id,sku_id,json.dumps({"count":count,"selected":selected}))
 
             # 6响应结果
-            return http.HttpResponse({'code': RETCODE.OK, 'errmsg': '添加购物车成功'})
+            return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '添加购物车成功'})
 
         else:
 
@@ -359,7 +357,7 @@ class CartsView(View):
             # 3 修改cookie数据
             carts_dict[sku_id] = {
                 'count':count,
-                'select':selected,
+                'selectd':selected,
             }
 
             # 4 加密

@@ -21,6 +21,15 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 
 
+# 忘记密码界面
+class FindPwdView(View):
+
+    def get(self,request):
+
+        return render(request,'find_password.html')
+
+
+
 
 
 
@@ -180,7 +189,9 @@ class LoginView(View):
 
         # 接收参数
         username = request.POST.get('username')
+
         password = request.POST.get('password')
+
         remembered = request.POST.get('remembered')
 
         # 校验参数

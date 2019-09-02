@@ -16,4 +16,6 @@ urlpatterns = [
   url(r'^orders/success/$',views.OrderSuccessView.as_view()),
 
 
+
+
 ]

@@ -22,6 +22,17 @@ urlpatterns = [
     # 用户浏览记录
     url(r'^browse_histories/$',views.UserBrowseHistory.as_view()),
 
+    # 显示用户所有订单界面
+    url(r'^orders/info/(?P<page_num>\d+)/$',views.ShowOrderView.as_view()),
+
+
+    # 去评价 保存评价信息
+    url(r'^orders/comment/$',views.CommentView.as_view()),
+
+
+    # 获取商品评价详情
+    url(r'^comments/(?P<sku_id>\d+)/$', views.CommentDetailView.as_view()),
+
 
 
 ]

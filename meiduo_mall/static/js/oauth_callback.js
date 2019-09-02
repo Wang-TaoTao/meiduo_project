@@ -23,7 +23,7 @@ var vm = new Vue({
 		mobile: '',
 		image_code: '',
 		sms_code: '',
-		// access_token: ''
+		access_token: ''
 	},
 	mounted(){
 		// 生成图形验证码

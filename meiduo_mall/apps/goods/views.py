@@ -4,16 +4,189 @@
 import json
 from django import http
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.paginator import Paginator
 from django.shortcuts import render
 from django.views import View
 from django_redis import get_redis_connection
 from apps.contents.utils import get_categories
 from apps.goods.models import GoodsCategory, SKU, GoodsVisitCount
 from apps.goods.utils import get_breadcrumb
+from apps.orders.models import OrderInfo, OrderGoods
 from apps.verifications import constants
 from meiduo_mall.settings.dev import logger
 from utils.response_code import RETCODE
 
+
+
+
+
+# 商品评论的详情
+class CommentDetailView(View):
+
+    def get(self, request, sku_id):
+
+        # 获取这个商品的评论对象
+        try:
+            comment = OrderGoods.objects.filter(sku_id=sku_id, is_commented=True).order_by('-create_time')
+        except:
+            return
+        comment_list = []
+        # 遍历这个商品的所有评论信息
+        for com in comment:
+            comment_list.append({
+                'score': com.score,
+                'comment': com.comment,
+                'username': com.order.user.username,
+
+            })
+        count = len(comment_list)
+
+        return http.JsonResponse({'code': RETCODE.OK, 'errmsg': "OK", 'comments': comment_list,'count':count})
+
+
+
+
+
+# 去评价 保存评价信息
+class CommentView(LoginRequiredMixin,View):
+
+    def get(self,request):
+
+        # 接收参数
+        order_id = request.GET.get('order_id')
+
+        # 查询该商品信息
+        try:
+            order = OrderInfo.objects.get(order_id=order_id)
+        except:
+            return
+
+        detail_list = []
+        for detail in order.skus.all():
+            print(detail.sku.name)
+            detail_list.append({
+
+                'default_image_url':detail.sku.default_image.url,
+                'name':detail.sku.name,
+                'total_mcount':str(detail.order.total_amount),
+                'price':str(detail.price),
+                'order_id':order_id,
+                'sku_id':detail.sku.id,
+
+
+            })
+
+        # 构造前端需要的数据
+        context = {
+            'skus':detail_list,
+        }
+
+
+        return render(request,'goods_judge.html',context)
+
+
+    def post(self,request):
+
+        # 接收参数
+        json_dict = json.loads(request.body.decode())
+        order_id = json_dict.get('order_id')
+        sku_id = json_dict.get('sku_id')
+        display_score = json_dict.get('score')
+        comment = json_dict.get('comment')
+        is_anonymous = json_dict.get('is_anonymous')
+
+
+        # 校验参数
+        if not all([order_id,sku_id,display_score,comment]):
+            return
+        if not isinstance(is_anonymous,bool):
+            return
+
+        try:
+            goods = OrderGoods.objects.get(order_id=order_id)
+        except:
+            return
+
+        # 保存数据
+        goods.score = display_score
+        goods.comment = comment
+        goods.is_commented = True
+        goods.is_anonymous = is_anonymous
+        goods.save()
+
+        # 修改订单基本信息表状态
+        try:
+            OrderInfo.objects.filter(order_id=order_id).update(status=OrderInfo.ORDER_STATUS_ENUM['FINISHED'])
+        except:
+            return
+
+        # 响应结果
+        return http.JsonResponse({'code': RETCODE.OK,'errmsg': 'OK'})
+
+
+
+
+
+
+# 展示用户全部订单
+class ShowOrderView(LoginRequiredMixin,View):
+
+    def get(self,request,page_num):
+
+        # 取出用户的所有订单信息
+        user = request.user
+
+        try:
+            order = OrderInfo.objects.filter(user_id=user.id).order_by('-create_time')
+        except:
+            return
+
+        # 将所有订单信息分页
+        paginator = Paginator(order,5)
+
+        # 获取当前页数据
+        page = paginator.page(page_num)
+
+        # 获取所有页数
+        total_page = paginator.num_pages
+
+        # 遍历当前页所有订单信息
+        info_list = []
+        for order_id in page:
+
+            detail_list = []
+            # 遍历当前页所有信息的商品信息
+            for detail in order_id.skus.all():
+                detail_list.append({
+                    'default_image_url':detail.sku.default_image.url,
+                    'name':detail.sku.name,
+                    'count':detail.count,
+                    'price':detail.price,
+                    'total_amount':detail.count * detail.price,
+
+                })
+
+            info_list.append({
+                'create_time':order_id.create_time,
+                'order_id':order_id.order_id,
+                'details':detail_list,
+                'total_amount':order_id.total_amount,
+                'freight':order_id.freight,
+                'status':order_id.status,
+                'pay_method':order_id.pay_method,
+            })
+
+
+        # 构造前端需要的数据
+        context = {
+            'page':info_list,
+            'page_num':page_num,
+            'total_page':total_page,
+
+        }
+
+        # 响应结果
+        return render(request,'user_center_order.html',context)
 
 
 
@@ -187,8 +360,6 @@ class DetailView(View):
             'specs': goods_specs,
         }
         return render(request, 'detail.html', context)
-
-
 
 
 

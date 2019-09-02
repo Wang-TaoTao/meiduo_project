@@ -1,15 +1,11 @@
 # contents 视图
 
-from collections import OrderedDict
 
 from django.shortcuts import render
-
-
 from django.views import View
-
 from apps.contents.models import ContentCategory
 from apps.contents.utils import get_categories
-from apps.goods.models import GoodsChannel
+
 
 
 
@@ -35,7 +31,7 @@ class IndexView(View):
         # 构造返回给前端的数据
         context = {
             'categories': categories,
-            'contents':contents,
+            'contents': contents,
         }
 
         return render(request,'index.html',context)

@@ -1,5 +1,7 @@
 # orders 视图
+
 import json
+
 from datetime import datetime
 
 from decimal import Decimal
@@ -15,11 +17,8 @@ from apps.goods.models import SKU
 
 
 
-
 from apps.orders.models import OrderInfo, OrderGoods
 from utils.response_code import RETCODE
-
-
 
 
 
@@ -145,9 +144,9 @@ class OrderCommitView(LoginRequiredMixin,View):
                         # sku.stock -= sku_count
                         # sku.save()
 
-                        # 模拟资源竞争
-                        import time
-                        time.sleep(10)
+                        # # 模拟资源竞争
+                        # import time
+                        # time.sleep(10)
 
                         # 使用乐观锁 更新库存量和销量
                         new_stock = old_stock - sku_count
@@ -205,6 +204,7 @@ class OrderCommitView(LoginRequiredMixin,View):
 
 # 结算订单页面
 class OrderSettlementView(LoginRequiredMixin,View):
+
     def get(self,request):
 
 
@@ -223,6 +223,7 @@ class OrderSettlementView(LoginRequiredMixin,View):
         # 3.2 取出所有购物车数据
         redis_data = redis_conn.hgetall(user.id)
         # 3.3 取出所有选中的购物车数据
+        print(redis_data)
         carts_dict = {}
         for key,value in redis_data.items():
             sku_id = int(key.decode())
@@ -257,7 +258,7 @@ class OrderSettlementView(LoginRequiredMixin,View):
             'total_amount':total_amount,
             'freight':freight,
             'payment_amount':total_amount + freight,
-            'default_address_id': user.default_address.id,
+            'default_address_id': user.default_address_id,
         }
         # 8 响应结果
         return render(request,'place_order.html',context)

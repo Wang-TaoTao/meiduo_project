@@ -23,20 +23,20 @@ var vm = new Vue({
             }
         },
 		// 检查密码
-        check_pwd: function(){
+        check_password: function(){
         	var re = /^[0-9A-Za-z]{8,20}$/;
 			if (re.test(this.password)) {
-                this.error_pwd = false;
+                this.error_password = false;
             } else {
-                this.error_pwd = true;
+                this.error_password = true;
             }
         },
         // 表单提交
         on_submit: function(){
             this.check_username();
-            this.check_pwd();
+            this.check_password();
 
-            if (this.error_username == true || this.error_pwd == true) {
+            if (this.error_username == true || this.error_password == true) {
                 // 不满足登录条件：禁用表单
 				window.event.returnValue = false
             }
@@ -56,7 +56,19 @@ var vm = new Vue({
                 })
         },
 
-
+         // 微博登录
+        weibo_login: function(){
+            var next = get_query_string('next') || '/';
+            var url = this.host + '/sina/login/?next=' + next;
+            axios.get(url, {
+                    responseType: 'json'
+                })
+                .then(response => {
+                    location.href = response.data.login_url;
+                })
+                .catch(error => {
+                    console.log(error.response);
+                })
+        }
     }
-
 });

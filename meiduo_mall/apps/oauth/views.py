@@ -12,12 +12,143 @@ from django.views import View
 from django_redis import get_redis_connection
 from pymysql import DatabaseError
 
-from apps.oauth.models import OAuthQQUser
+from apps.oauth.models import OAuthQQUser, OAuthSinaUser
 from apps.users.models import User
 from meiduo_mall.settings.dev import logger
 from utils.response_code import RETCODE
 from django import http
 from utils.secret import SecretOauth
+from libs.sinaweibo import sinaweibopy3
+
+
+
+
+
+
+# 获取微博登录扫码页面
+class WeiboAuthURLView(View):
+
+    def get(self,request):
+
+
+        # 创建sina登录授权对象
+        sina = sinaweibopy3.APIClient(app_key=settings.APP_KEY,app_secret=settings.APP_SECRET,redirect_uri=settings.REDIRECT_URL)
+
+        # 生成授权url地址
+        login_url = sina.get_authorize_url()
+
+        # 响应结果
+        return http.JsonResponse({'code': RETCODE.OK,'errmsg': "OK",'login_url': login_url})
+
+
+
+
+# 用户sina扫码的回调处理
+class WeiboAuthOpenidView(View):
+
+    def get(self,request):
+
+        # 接收code
+        code = request.GET.get('code')
+
+        # 创建sin登录授权对象
+        sina = sinaweibopy3.APIClient(app_key=settings.APP_KEY,app_secret=settings.APP_SECRET,redirect_uri=settings.REDIRECT_URL)
+
+        # 1.根据code 向微博服务器 获取access_token
+        result = sina.request_access_token(code)
+
+        # 2.根据access_token 获取openid
+        sina.set_access_token(result.access_token,result.expires_in)
+        openid = result.uid
+
+
+        # 判断是否初次授权
+        try:
+            qquser = OAuthSinaUser.objects.get(uid=openid)
+        except:
+            # 如果是初次授权 则显示绑定页面
+            # 将openid加密
+            json_str = SecretOauth().dumps({'openid':openid})
+            # 显示绑定页面
+            context = {
+                'openid':json_str
+            }
+            return render(request,'oauth_callback.html',context)
+        else:
+            # 如果不是初次授权 则状态保持 转到相关页面
+            user = qquser.user
+            # 实现状态保持
+            login(request,user)
+
+            # 转到相关页面
+            response = redirect(reverse('contents:index'))
+            # 将用户名写入cookie
+            response.set_cookie('username',user.username,max_age=3600*24*15)
+            # 响应结果
+            return response
+
+
+    def post(self,request):
+
+        # 接收openid
+        openid_str = request.POST.get('openid')
+        # 接收参数
+        mobile = request.POST.get('mobile')
+        password = request.POST.get('password')
+        sms_code = request.POST.get("sms_code")
+
+
+        # 校验参数
+        # 解密openid
+        openid_dict = SecretOauth().loads(openid_str)
+        if openid_dict is None:
+            return http.HttpResponseForbidden('授权信息无效，请重新授权')
+        if not all([mobile,password,sms_code]):
+            return http.HttpResponseForbidden('缺少必传参数')
+        if not re.match(r'^1[3-9]\d{9}$', mobile):
+            return http.HttpResponseForbidden('请输入正确的手机号码')
+        if not re.match(r'^[0-9A-Za-z]{8,20}$', password):
+            return http.HttpResponseForbidden('请输入8-20位的密码')
+        # 验证短信验证码
+        from django_redis import get_redis_connection
+        redis_conn = get_redis_connection('sms_code')
+        redis_sms_code = redis_conn.get('sms_%s' % mobile)
+
+        if redis_sms_code is None:
+            return render(request, 'oauth_callback.html', {'sms_code_errmsg':'无效的短信验证码'})
+        if sms_code.lower() != redis_sms_code.decode().lower():
+            return render(request, 'oauth_callback.html', {'sms_code_errmsg': '输入短信验证码有误'})
+
+        # 取出openid
+        openid = openid_dict.get('openid')
+        # 处理：  初次授权 完成openid与user的绑定
+        # 1 判断手机号是否已经存在
+        try:
+            user = User.objects.get(mobile=mobile)
+        except:
+            # 2 手机号不存在 就创建用户
+            user = User.objects.create_user(username=mobile,password=password,mobile=mobile)
+        else:
+            # 3 如果手机号存在的话 就校验密码
+            if not user.check_password(password):
+                return http.HttpResponseForbidden('手机号已经存在或密码错误')
+
+        # 绑定user和openid : 新建OAuthSinaUser对象
+        OAuthSinaUser.objects.create(
+            user=user,
+            uid=openid,
+        )
+        # 状态保持
+        login(request,user)
+
+        # 重定向到用户原先所在的位置页面
+        response = redirect(reverse('contents:index'))
+
+        # 写入cooke
+        response.set_cookie('username',user.username,max_age=3600*24*15)
+
+        # 响应结果
+        return response
 
 
 
@@ -29,7 +160,7 @@ class QQAuthURLView(View):
     """
     def get(self, request):
         # next表示从哪个页面进入到的登录页面，将来登录成功后，就自动回到那个页面
-        next = request.GET.get('next')
+        # next = request.GET.get('next')
 
         # 获取QQ登录页面网址
         oauth = OAuthQQ(client_id=settings.QQ_CLIENT_ID, client_secret=settings.QQ_CLIENT_SECRET, redirect_uri=settings.QQ_REDIRECT_URI, state=next)
@@ -40,7 +171,7 @@ class QQAuthURLView(View):
 
 
 
-# 用户扫码登录的回调处理
+# 用户QQ扫码登录的回调处理
 class QQAuthUserView(View):
     """用户扫码登录的回调处理"""
 

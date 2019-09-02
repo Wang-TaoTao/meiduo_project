@@ -60,9 +60,14 @@ INSTALLED_APPS = [
     'apps.carts',
     # 注册order，订单子应用
     'apps.orders',
+    # 注册payment，支付宝子应用
+    'apps.payment',
+
 
     # 注册第三方Haystack，对接搜索引擎的框架
     'haystack',
+    # 注册django_crontab应用，定时任务实现静态化页面
+    'django_crontab',
 
 ]
 
@@ -128,7 +133,7 @@ WSGI_APPLICATION = 'meiduo_mall.wsgi.application'
 
 # 配置mysql数据库
 DATABASES = {
-    'default': {
+    'default': {  # 写（主机）
         'ENGINE': 'django.db.backends.mysql', # 数据库引擎
         'HOST': '127.0.0.1', # 数据库主机
         'PORT': 3306, # 数据库端口
@@ -136,7 +141,16 @@ DATABASES = {
         'PASSWORD': 'admin', # 数据库用户密码
         'NAME': 'meiduo' # 数据库名字
     },
+    'slave': { # 读（从机）
+        'ENGINE': 'django.db.backends.mysql',
+        'HOST': '127.0.0.1',
+        'PORT': 8306,
+        'USER': 'root',
+        'PASSWORD': 'mysql',
+        'NAME': 'meiduo'
+    }
 }
+
 
 
 # Password validation
@@ -323,7 +337,7 @@ PDFS_BASE_URL = 'http://image.meiduo.site:8888/'
 HAYSTACK_CONNECTIONS = {
     'default': {
         'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
-        'URL': 'http://192.168.130.129:9200/', # Elasticsearch服务器ip地址，端口号固定为9200
+        'URL': 'http://192.168.119.128:9200/', # Elasticsearch服务器ip地址，端口号固定为9200
         'INDEX_NAME': 'meiduo', # Elasticsearch建立的索引库的名称
     },
 }
@@ -331,5 +345,37 @@ HAYSTACK_CONNECTIONS = {
 
 # 当添加、修改、删除数据时，自动生成索引
 HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
+
+
+# 支付宝SDK配置参数
+ALIPAY_APPID = '2016101400685212'
+ALIPAY_DEBUG = True
+ALIPAY_URL = 'https://openapi.alipaydev.com/gateway.do'
+ALIPAY_RETURN_URL = 'http://www.meiduo.site:8000/payment/status/'
+
+
+
+# 定时任务
+CRONJOBS = [
+    # 每1分钟生成一次首页静态文件
+    ('*/1 * * * *','apps.contents.crons.generate_static_index_html','>>' + os.path.join(BASE_DIR,'logs/crontab.log'))
+
+
+]
+
+# 定时器任务中文
+CRONTAB_COMMAND_PREFIX = 'LANG_ALL=zh_cn.UTF-8'
+
+
+
+# 配置数据库读写路由
+DATABASE_ROUTERS = ['utils.db_router.MasterSlaveDBRouter']
+
+
+# 配置微博授权登录
+APP_KEY = '3305669385'
+APP_SECRET= '74c7bea69d5fc64f5c3b80c802325276'
+REDIRECT_URL = 'http://www.meiduo.site:8000/sina_callback'
+
 
 

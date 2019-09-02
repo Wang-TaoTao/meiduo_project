@@ -43,6 +43,9 @@ urlpatterns = [
     # 配置orders路由
     url(r'^',include('apps.orders.urls')),
 
+    # 配置payment路由
+    url(r'^',include('apps.payment.urls')),
+
     # 配置haystack 对接搜索引擎的框架总路由
     url(r'^search/', include('haystack.urls')),
 
