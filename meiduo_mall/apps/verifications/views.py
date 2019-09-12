@@ -227,11 +227,11 @@ class SMSCodeView(View):
         # sms_client_redis.setex('sms_%s' % mobile ,300 ,sms_code)
 
         # 避免频繁发送短信验证码
-        # send_flag = sms_client_redis.get('send_flag_%s' % mobile)
+        send_flag = sms_client_redis.get('send_flag_%s' % mobile)
 
 
-        # if send_flag:
-        #     return http.JsonResponse({'code': RETCODE.THROTTLINGERR, 'errmsg': '发送短信过于频繁'})
+        if send_flag:
+            return http.JsonResponse({'code': RETCODE.THROTTLINGERR, 'errmsg': '发送短信过于频繁'})
 
         # 创建Redis管道
         pl = sms_client_redis.pipeline()

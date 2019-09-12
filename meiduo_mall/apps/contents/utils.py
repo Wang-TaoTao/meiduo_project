@@ -47,6 +47,7 @@ def get_categories():
             # 5三级分类 二级.subs.all()
             for cat3 in cat2.subs.all():
                 cat2.sub_cats.append(cat3)
+
             categories[group_id]['sub_cats'].append(cat2)
 
 

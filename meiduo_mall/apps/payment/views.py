@@ -44,7 +44,7 @@ class PaymentStatusView(View):
         if success:
             # 取出订单号
             order_id = data.get('out_trade_no')
-            # 取出支付宝流水好
+            # 取出支付宝流水号
             trade_id = data.get('trade_no')
             # 保存支付模型类信息
             Payment.objects.create(
@@ -67,6 +67,9 @@ class PaymentStatusView(View):
         else:
             # 如果不正确 订单支付失败 重定向到我的订单
             return http.HttpResponseForbidden('非法请求')
+
+
+
 
 
 # 支付宝支付订单功能  --- 生成登录支付宝链接

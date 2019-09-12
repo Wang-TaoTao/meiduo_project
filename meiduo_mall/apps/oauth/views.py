@@ -249,7 +249,7 @@ class QQAuthUserView(View):
         if not openid:
             return render(request, 'oauth_callback.html', {'openid_errmsg': '无效的openid'})
 
-        # 保存注册数据
+        # 保存注册数据 判断该用户是否存在
         try:
             user = User.objects.get(mobile=mobile)
         except User.DoesNotExist:

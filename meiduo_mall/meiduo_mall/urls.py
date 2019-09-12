@@ -49,4 +49,8 @@ urlpatterns = [
     # 配置haystack 对接搜索引擎的框架总路由
     url(r'^search/', include('haystack.urls')),
 
+
+    # 配置美多后台管理路由
+    url(r'^meiduo_admin/', include('apps.meiduo_admin.urls', namespace='meiduo_admin')),
+
 ]

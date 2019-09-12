@@ -33,10 +33,11 @@ class CommentDetailView(View):
         comment_list = []
         # 遍历这个商品的所有评论信息
         for com in comment:
+            username = com.order.user.username
             comment_list.append({
                 'score': com.score,
                 'comment': com.comment,
-                'username': com.order.user.username,
+                'username': username[0] + '***' + username[-1] if com.is_anonymous else username,
 
             })
         count = len(comment_list)
@@ -59,11 +60,11 @@ class CommentView(LoginRequiredMixin,View):
         try:
             order = OrderInfo.objects.get(order_id=order_id)
         except:
-            return
+            return http.HttpResponseNotFound('订单不存在')
 
         detail_list = []
         for detail in order.skus.all():
-            print(detail.sku.name)
+
             detail_list.append({
 
                 'default_image_url':detail.sku.default_image.url,
@@ -101,6 +102,10 @@ class CommentView(LoginRequiredMixin,View):
             return
         if not isinstance(is_anonymous,bool):
             return
+        try:
+            sku = SKU.objects.get(id=sku_id)
+        except SKU.DoesNotExist:
+            return http.HttpResponseForbidden('参数sku_id错误')
 
         try:
             goods = OrderGoods.objects.get(order_id=order_id)
@@ -113,6 +118,12 @@ class CommentView(LoginRequiredMixin,View):
         goods.is_commented = True
         goods.is_anonymous = is_anonymous
         goods.save()
+
+        # 累计评论数据
+        sku.comments +=1
+        sku.save()
+        sku.spu.comments +=1
+        sku.spu.save()
 
         # 修改订单基本信息表状态
         try:

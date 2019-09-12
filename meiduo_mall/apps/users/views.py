@@ -206,7 +206,7 @@ class LoginView(View):
 
         # 校验账户
         from django.contrib.auth import authenticate,login
-        user = authenticate(username=username,password=password)
+        user = authenticate(request,username=username,password=password)
 
         if user is None:
 
@@ -249,10 +249,14 @@ class LogOutView(View):
     def get(self,request):
 
         from django.contrib.auth import logout
+        # 清理session 退出
         logout(request)
 
+        # 重定向到登录页面
         response = redirect(reverse('users:login'))
+        # 删除cookie
         response.delete_cookie('username')
+        # 响应结果
         return response
 
 
@@ -306,24 +310,22 @@ class RegisterView(View):
 
         # 校验参数
         if not all([username, password, password2, mobile, allow]):
-
             return http.HttpResponseForbidden("缺少参数，请把信息输入完整！")
 
         if not re.match(r'^[a-zA-Z0-9_-]{5,20}$',username):
-
             return http.HttpResponseForbidden("请输入5-20位的用户名！")
 
         if not re.match(r'^[0-9A-Za-z]{8,20}$',password):
-
             return http.HttpResponseForbidden("请输入8-20位的密码!")
 
         if password != password2:
-
             return http.HttpResponseForbidden("请输入相同的密码！")
 
         if not re.match(r'^1[345789]\d{9}$',mobile):
-
             return http.HttpResponseForbidden("请输入正确的手机号！")
+
+        if allow != "on":
+            return http.HttpResponseForbidden("请勾选协议！")
 
         # 短信验证
         sms_code = request.POST.get('msg_code')
@@ -338,17 +340,7 @@ class RegisterView(View):
         if sms_code.lower() != redis_sms_code.decode().lower():
             return render(request, 'register.html', {'sms_code_errmsg': '输入短信验证码有误'})
 
-
-
-        # # 保存短信验证码
-        # sms_code_redis.setex('sms_%s' % phone,constants.SMS_CODE_REDIS_EXPRES,sms_code)
-        # # 重新写入send_flag
-        # sms_code_redis.setex('send_flag_%s' % phone,constants.SEND_SMS_CODE_INTERVAL,1)
-
-        if allow != "on":
-
-            return http.HttpResponseForbidden("请勾选协议！")
-
+        # 创建用户
         try:
             user = User.objects.create_user(username=username,password=password,mobile=mobile)
 
@@ -363,5 +355,7 @@ class RegisterView(View):
 
         # 如果验证成功就跳转到首页
         response = redirect(reverse('contents:index'))
+        # 首页显示用户名
         response.set_cookie('username',user.username,max_age=3600*24*15)
+        # 响应结果
         return response

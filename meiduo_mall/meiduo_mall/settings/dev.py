@@ -62,16 +62,25 @@ INSTALLED_APPS = [
     'apps.orders',
     # 注册payment，支付宝子应用
     'apps.payment',
+    # 注册meiduo_admin，后台管理子应用
+    'apps.meiduo_admin',
+
 
 
     # 注册第三方Haystack，对接搜索引擎的框架
     'haystack',
     # 注册django_crontab应用，定时任务实现静态化页面
     'django_crontab',
+    # 注册DRF
+    'rest_framework',
+    # 注册跨域CORS
+    'corsheaders',
 
 ]
 
 MIDDLEWARE = [
+    # 跨域名CORS 中间件配置
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -80,6 +89,17 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+# CORS 添加白名单
+CORS_ORIGIN_WHITELIST = (
+    'http://127.0.0.1:8000',
+    'http://localhost:8000',
+    'http://www.meiduo.site:8000',
+    'http://www.meiduo.site:8080',
+)
+
+# 在跨域访问中，后端是否支持对cookie的操作。  允许携带cookie
+CORS_ALLOW_CREDENTIALS = True
 
 ROOT_URLCONF = 'meiduo_mall.urls'
 
@@ -141,14 +161,14 @@ DATABASES = {
         'PASSWORD': 'admin', # 数据库用户密码
         'NAME': 'meiduo' # 数据库名字
     },
-    'slave': { # 读（从机）
-        'ENGINE': 'django.db.backends.mysql',
-        'HOST': '127.0.0.1',
-        'PORT': 8306,
-        'USER': 'root',
-        'PASSWORD': 'mysql',
-        'NAME': 'meiduo'
-    }
+    # 'slave': { # 读（从机）
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'HOST': '127.0.0.1',
+    #     'PORT': 8306,
+    #     'USER': 'root',
+    #     'PASSWORD': 'mysql',
+    #     'NAME': 'meiduo'
+    # }
 }
 
 
@@ -305,8 +325,9 @@ LOGIN_URL = '/login/'
 
 
 # 指定自定义的用户认证后端
-AUTHENTICATION_BACKENDS = ['apps.users.utils.UsernameMobileAuthBackend']
-
+# AUTHENTICATION_BACKENDS = ['apps.users.utils.UsernameMobileAuthBackend']
+# 指定前后端请求验证的用户认证后端
+AUTHENTICATION_BACKENDS =['utils.authenticate.MeiduoModelBackend']
 
 # 配置邮件服务器
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend' # 指定邮件后端
@@ -369,7 +390,7 @@ CRONTAB_COMMAND_PREFIX = 'LANG_ALL=zh_cn.UTF-8'
 
 
 # 配置数据库读写路由
-DATABASE_ROUTERS = ['utils.db_router.MasterSlaveDBRouter']
+# DATABASE_ROUTERS = ['utils.db_router.MasterSlaveDBRouter']
 
 
 # 配置微博授权登录
@@ -379,3 +400,18 @@ REDIRECT_URL = 'http://www.meiduo.site:8000/sina_callback'
 
 
 
+# 配置 JWT
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ),
+}
+import datetime
+JWT_AUTH = {
+    'JWT_EXPIRATION_DELTA':
+        datetime.timedelta(days=7),  # 设置token有效期
+    'JWT_RESPONSE_PAYLOAD_HANDLER':
+        'apps.meiduo_admin.utils.jwt_response_payload_handler'
+}
