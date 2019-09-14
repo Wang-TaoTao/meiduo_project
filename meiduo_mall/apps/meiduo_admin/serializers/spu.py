@@ -10,8 +10,12 @@ from apps.goods.models import SPU, Brand, GoodsCategory
 
 
 
-# 新增SPU数据---获取一级分类信息 序列化器
+# 新增SPU数据---获取一级二级三级分类信息 序列化器
 class CategorysSerizliser(serializers.ModelSerializer):
+
+    # parent_id = serializers.IntegerField()
+    # parent = serializers.StringRelatedField(read_only=True)
+
 
     class Meta:
         model = GoodsCategory

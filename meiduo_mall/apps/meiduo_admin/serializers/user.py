@@ -7,7 +7,7 @@ from rest_framework.response import Response
 
 from apps.users.models import User
 
-# 查询用户信息 序列化器
+# 获取用户信息 序列化器
 class UserSerializer(serializers.ModelSerializer):
 
     class Meta:

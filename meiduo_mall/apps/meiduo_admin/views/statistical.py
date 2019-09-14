@@ -81,7 +81,6 @@ class UserDailyOrderCountAPIView(APIView):
 
     def get(self,request):
 
-
         # 1.获取当天日期
         now_date = date.today()
         # 2.获取当天下单的所有用户对象
@@ -111,7 +110,6 @@ class UserDailyOrderCountAPIView(APIView):
 
 # 统计日活跃用户
 class UserDailyActiveCountAPIView(APIView):
-
 
 
     def get(self,request):
@@ -167,7 +165,6 @@ class UserTotalCountAPIView(APIView):
 
         # 3.响应结果
         return Response({
-
             'count':count,
             'date':now_date,
         })

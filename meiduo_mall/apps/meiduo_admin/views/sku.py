@@ -40,9 +40,9 @@ class SPUSimpleView(ListAPIView):
 class SKUCategoriesView(ListAPIView):
 
     # 第一种 subs为None的是三级分类
-    queryset = GoodsCategory.objects.filter(subs=None)
+    # queryset = GoodsCategory.objects.filter(subs=None)
     # 第二种 parent_id > 37的也是三级分类
-    # queryset = GoodsCategory.objects.filter(parent_id__gt=37)
+    queryset = GoodsCategory.objects.filter(parent_id__gt=37)
 
     serializer_class = SKUCategorieSerializer
 
